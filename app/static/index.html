@@ -13,7 +13,7 @@
           <p class="eyebrow">Used EV shortlist</p>
           <h1>EV Deal Scout</h1>
         </div>
-        <button id="refreshBtn" class="primary">Refresh scrape</button>
+        <button id="refreshBtn" class="primary">Refresh market prices</button>
       </section>
 
       <section class="controls" aria-label="Search filters">
@@ -28,14 +28,6 @@
         <label>
           Max km
           <input id="maxMileage" type="number" placeholder="Any" min="0" step="5000" />
-        </label>
-        <label class="check">
-          <input id="srcNjuskalo" type="checkbox" checked />
-          Njuškalo
-        </label>
-        <label class="check">
-          <input id="srcIndex" type="checkbox" checked />
-          Index Oglasi
         </label>
       </section>
 
@@ -52,6 +44,10 @@
           <span id="bestScore">-</span>
           <small>best score</small>
         </div>
+        <div>
+          <span id="marketCoverage">-</span>
+          <small>with market data</small>
+        </div>
       </section>
 
       <section id="statuses" class="statuses"></section>
@@ -60,8 +56,20 @@
         <summary>Add a listing manually</summary>
         <form id="manualForm" class="manual-form">
           <label>
+            Make
+            <input id="manualMake" type="text" required placeholder="Renault" />
+          </label>
+          <label>
+            Model
+            <input id="manualModel" type="text" required placeholder="Zoe" />
+          </label>
+          <label>
+            Year
+            <input id="manualYear" type="number" required min="1990" max="2030" step="1" />
+          </label>
+          <label>
             Title
-            <input id="manualTitle" type="text" required placeholder="Renault Zoe 41 kWh" />
+            <input id="manualTitle" type="text" placeholder="Renault Zoe 41 kWh" />
           </label>
           <label>
             URL
@@ -76,8 +84,12 @@
             <input id="manualMileage" type="number" required min="0" step="1000" />
           </label>
           <label>
-            Year
-            <input id="manualYear" type="number" min="1990" max="2030" step="1" />
+            Battery kWh
+            <input id="manualBattery" type="number" min="0" step="0.1" placeholder="Optional" />
+          </label>
+          <label>
+            Trim
+            <input id="manualTrim" type="text" placeholder="Optional" />
           </label>
           <button class="secondary" type="submit">Add</button>
         </form>
