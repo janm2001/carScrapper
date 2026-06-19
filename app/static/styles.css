@@ -1,0 +1,281 @@
+:root {
+  color-scheme: light;
+  --ink: #17202a;
+  --muted: #65707d;
+  --line: #d9dee5;
+  --panel: #ffffff;
+  --bg: #f5f7f4;
+  --green: #1d7a5c;
+  --teal: #0f6f7a;
+  --amber: #b76e00;
+  --red: #ad3434;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 48px;
+}
+
+.topbar,
+.controls,
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topbar {
+  justify-content: space-between;
+  padding: 12px 0 22px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.05;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.primary {
+  border: 0;
+  border-radius: 6px;
+  background: var(--green);
+  color: white;
+  padding: 11px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.controls {
+  flex-wrap: wrap;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+input[type="number"] {
+  width: 140px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 9px 10px;
+  color: var(--ink);
+  background: white;
+}
+
+input[type="text"],
+input[type="url"] {
+  width: min(320px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 9px 10px;
+  color: var(--ink);
+  background: white;
+}
+
+.check {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: 38px;
+  color: var(--ink);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 16px 0;
+}
+
+.summary div,
+.status,
+.listing {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.summary div {
+  padding: 16px;
+}
+
+.summary span {
+  display: block;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.summary small {
+  color: var(--muted);
+}
+
+.statuses {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.status {
+  padding: 10px 12px;
+  color: var(--muted);
+  border-left: 4px solid var(--teal);
+}
+
+.status.bad {
+  border-left-color: var(--amber);
+}
+
+.listings {
+  display: grid;
+  gap: 10px;
+}
+
+.manual {
+  margin: 0 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.manual summary {
+  cursor: pointer;
+  padding: 12px 14px;
+  font-weight: 800;
+}
+
+.manual-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  padding: 0 14px 14px;
+}
+
+.secondary {
+  border: 1px solid var(--teal);
+  border-radius: 6px;
+  background: white;
+  color: var(--teal);
+  padding: 10px 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.listing {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) 180px 190px;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+}
+
+.rank {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #e4efe8;
+  color: var(--green);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.title {
+  display: block;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.meta,
+.reasons {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.score {
+  font-size: 30px;
+  font-weight: 900;
+  color: var(--teal);
+}
+
+.money {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.money strong {
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.empty {
+  padding: 28px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 820px) {
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
+  }
+
+  .listing {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .score,
+  .money {
+    grid-column: 2;
+  }
+}

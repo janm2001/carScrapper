@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EV Deal Scout</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">Used EV shortlist</p>
+          <h1>EV Deal Scout</h1>
+        </div>
+        <button id="refreshBtn" class="primary">Refresh scrape</button>
+      </section>
+
+      <section class="controls" aria-label="Search filters">
+        <label>
+          Min price
+          <input id="minPrice" type="number" value="5000" min="0" step="250" />
+        </label>
+        <label>
+          Max price
+          <input id="maxPrice" type="number" value="12000" min="0" step="250" />
+        </label>
+        <label>
+          Max km
+          <input id="maxMileage" type="number" placeholder="Any" min="0" step="5000" />
+        </label>
+        <label class="check">
+          <input id="srcNjuskalo" type="checkbox" checked />
+          Njuškalo
+        </label>
+        <label class="check">
+          <input id="srcIndex" type="checkbox" checked />
+          Index Oglasi
+        </label>
+      </section>
+
+      <section class="summary" aria-live="polite">
+        <div>
+          <span id="count">0</span>
+          <small>ranked listings</small>
+        </div>
+        <div>
+          <span id="bestPrice">-</span>
+          <small>lowest price</small>
+        </div>
+        <div>
+          <span id="bestScore">-</span>
+          <small>best score</small>
+        </div>
+      </section>
+
+      <section id="statuses" class="statuses"></section>
+
+      <details class="manual">
+        <summary>Add a listing manually</summary>
+        <form id="manualForm" class="manual-form">
+          <label>
+            Title
+            <input id="manualTitle" type="text" required placeholder="Renault Zoe 41 kWh" />
+          </label>
+          <label>
+            URL
+            <input id="manualUrl" type="url" required placeholder="https://..." />
+          </label>
+          <label>
+            Price
+            <input id="manualPrice" type="number" required min="0" step="50" />
+          </label>
+          <label>
+            Kilometers
+            <input id="manualMileage" type="number" required min="0" step="1000" />
+          </label>
+          <label>
+            Year
+            <input id="manualYear" type="number" min="1990" max="2030" step="1" />
+          </label>
+          <button class="secondary" type="submit">Add</button>
+        </form>
+      </details>
+
+      <section id="listings" class="listings"></section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
