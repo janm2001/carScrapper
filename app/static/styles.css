@@ -9,6 +9,7 @@
   --teal: #0f6f7a;
   --amber: #b76e00;
   --red: #ad3434;
+  --blue: #265b96;
 }
 
 * {
@@ -120,7 +121,7 @@ input[type="url"] {
 
 .summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: 16px 0;
 }
 
@@ -200,9 +201,9 @@ input[type="url"] {
 
 .listing {
   display: grid;
-  grid-template-columns: 88px minmax(0, 1fr) 180px 190px;
+  grid-template-columns: 72px minmax(0, 1.2fr) 110px minmax(180px, 0.8fr) 190px;
   gap: 14px;
-  align-items: center;
+  align-items: start;
   padding: 14px;
 }
 
@@ -240,6 +241,7 @@ input[type="url"] {
   color: var(--teal);
 }
 
+.market,
 .money {
   display: grid;
   gap: 5px;
@@ -247,9 +249,30 @@ input[type="url"] {
   font-size: 13px;
 }
 
+.market strong,
 .money strong {
   color: var(--ink);
   font-size: 18px;
+}
+
+.market a {
+  color: var(--blue);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.good {
+  color: var(--green);
+  font-weight: 800;
+}
+
+.bad {
+  color: var(--red);
+  font-weight: 800;
+}
+
+.muted-market {
+  padding-top: 2px;
 }
 
 .empty {
@@ -275,7 +298,24 @@ input[type="url"] {
   }
 
   .score,
+  .market,
   .money {
     grid-column: 2;
+  }
+}
+
+@media (max-width: 560px) {
+  .shell {
+    width: min(100% - 20px, 1180px);
+  }
+
+  input[type="number"],
+  input[type="text"],
+  input[type="url"] {
+    width: 100%;
+  }
+
+  label {
+    width: 100%;
   }
 }

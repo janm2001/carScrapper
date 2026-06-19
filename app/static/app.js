@@ -3,17 +3,20 @@ const els = {
   minPrice: document.querySelector("#minPrice"),
   maxPrice: document.querySelector("#maxPrice"),
   maxMileage: document.querySelector("#maxMileage"),
-  srcNjuskalo: document.querySelector("#srcNjuskalo"),
-  srcIndex: document.querySelector("#srcIndex"),
   manualForm: document.querySelector("#manualForm"),
+  manualMake: document.querySelector("#manualMake"),
+  manualModel: document.querySelector("#manualModel"),
   manualTitle: document.querySelector("#manualTitle"),
   manualUrl: document.querySelector("#manualUrl"),
   manualPrice: document.querySelector("#manualPrice"),
   manualMileage: document.querySelector("#manualMileage"),
   manualYear: document.querySelector("#manualYear"),
+  manualBattery: document.querySelector("#manualBattery"),
+  manualTrim: document.querySelector("#manualTrim"),
   count: document.querySelector("#count"),
   bestPrice: document.querySelector("#bestPrice"),
   bestScore: document.querySelector("#bestScore"),
+  marketCoverage: document.querySelector("#marketCoverage"),
   statuses: document.querySelector("#statuses"),
   listings: document.querySelector("#listings"),
 };
@@ -28,19 +31,12 @@ const km = new Intl.NumberFormat("hr-HR", {
   maximumFractionDigits: 0,
 });
 
-function selectedSources() {
-  const sources = [];
-  if (els.srcNjuskalo.checked) sources.push("njuskalo");
-  if (els.srcIndex.checked) sources.push("index_oglasi");
-  return sources.join(",");
-}
-
-function buildUrl(refresh = false) {
+function buildUrl() {
   const params = new URLSearchParams({
     min_price: els.minPrice.value || "5000",
     max_price: els.maxPrice.value || "12000",
-    sources: selectedSources(),
-    refresh: String(refresh),
+    sources: "manual,autoscout24",
+    refresh: "false",
   });
   if (els.maxMileage.value) {
     params.set("max_mileage", els.maxMileage.value);
@@ -48,18 +44,36 @@ function buildUrl(refresh = false) {
   return `/api/search?${params.toString()}`;
 }
 
-async function load(refresh = false) {
+async function load() {
   els.refreshBtn.disabled = true;
-  els.refreshBtn.textContent = refresh ? "Scraping..." : "Loading...";
+  els.refreshBtn.textContent = "Loading...";
   try {
-    const response = await fetch(buildUrl(refresh));
+    const response = await fetch(buildUrl());
     const data = await response.json();
     render(data);
   } catch (error) {
     els.statuses.innerHTML = `<div class="status bad">Request failed: ${error.message}</div>`;
   } finally {
     els.refreshBtn.disabled = false;
-    els.refreshBtn.textContent = "Refresh scrape";
+    els.refreshBtn.textContent = "Refresh market prices";
+  }
+}
+
+async function refreshMarket() {
+  els.refreshBtn.disabled = true;
+  els.refreshBtn.textContent = "Checking AutoScout24...";
+  try {
+    const response = await fetch("/api/market-refresh", { method: "POST" });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.detail || "Market refresh failed");
+    }
+    await load();
+  } catch (error) {
+    els.statuses.innerHTML = `<div class="status bad">Market refresh failed: ${escapeHtml(error.message)}</div>`;
+  } finally {
+    els.refreshBtn.disabled = false;
+    els.refreshBtn.textContent = "Refresh market prices";
   }
 }
 
@@ -75,6 +89,9 @@ function renderSummary(listings) {
     ? eur.format(Math.min(...listings.map((item) => item.price_eur)))
     : "-";
   els.bestScore.textContent = listings.length ? `${listings[0].score}` : "-";
+  els.marketCoverage.textContent = listings.length
+    ? `${listings.filter((item) => item.market_status === "ok").length}/${listings.length}`
+    : "-";
 }
 
 function renderStatuses(statuses) {
@@ -88,7 +105,7 @@ function renderStatuses(statuses) {
 
 function renderListings(listings) {
   if (!listings.length) {
-    els.listings.innerHTML = `<div class="empty">No ranked listings yet. Try Refresh scrape; if sources are blocked, the status panel will say why.</div>`;
+    els.listings.innerHTML = `<div class="empty">No ranked listings yet. Add a manual car, then refresh market prices.</div>`;
     return;
   }
 
@@ -96,21 +113,30 @@ function renderListings(listings) {
 }
 
 function listingTemplate(item) {
-  const reasons = item.reasons.slice(0, 2).map(escapeHtml).join(" ");
+  const reasons = item.reasons.slice(0, 3).map(escapeHtml).join(" ");
+  const market = marketTemplate(item);
+  const details = [
+    item.make && item.model ? `${escapeHtml(item.make)} ${escapeHtml(item.model)}` : labelSource(item.source),
+    item.year || null,
+    item.battery_kwh ? `${item.battery_kwh} kWh` : null,
+    item.trim ? escapeHtml(item.trim) : null,
+  ].filter(Boolean).join(" · ");
   return `
     <article class="listing">
       <div class="rank">${item.rank}</div>
       <div>
         <a class="title" href="${item.url}" target="_blank" rel="noreferrer">${escapeHtml(item.title)}</a>
         <div class="meta">
-          ${labelSource(item.source)} · ${eur.format(item.price_eur)} · ${km.format(item.mileage_km)} km${item.year ? ` · ${item.year}` : ""}
+          ${details}
         </div>
+        <div class="meta">${eur.format(item.price_eur)} · ${km.format(item.mileage_km)} km</div>
         <div class="reasons">${reasons}</div>
       </div>
       <div>
         <div class="score">${item.score}</div>
         <div class="meta">deal score</div>
       </div>
+      ${market}
       <div class="money">
         <span>Opening offer <strong>${eur.format(item.negotiation_open_eur)}</strong></span>
         <span>Walk-away ceiling <strong>${eur.format(item.negotiation_ceiling_eur)}</strong></span>
@@ -119,12 +145,46 @@ function listingTemplate(item) {
   `;
 }
 
+function marketTemplate(item) {
+  if (item.market_status !== "ok") {
+    return `
+      <div class="market muted-market">
+        <span>Market</span>
+        <strong>${escapeHtml(marketStatusLabel(item.market_status))}</strong>
+        ${item.market_source_url ? `<a href="${item.market_source_url}" target="_blank" rel="noreferrer">AutoScout24 search</a>` : ""}
+      </div>
+    `;
+  }
+  const delta = item.market_delta_eur || 0;
+  const deltaClass = delta <= 0 ? "good" : "bad";
+  const deltaLabel = delta <= 0 ? "under market" : "over market";
+  return `
+    <div class="market">
+      <span>Median <strong>${eur.format(item.market_median_price_eur)}</strong></span>
+      <span>Average <strong>${eur.format(item.market_average_price_eur)}</strong></span>
+      <span class="${deltaClass}">${eur.format(Math.abs(delta))} ${deltaLabel}</span>
+      <a href="${item.market_source_url}" target="_blank" rel="noreferrer">${item.market_sample_size} samples</a>
+    </div>
+  `;
+}
+
 function labelSource(source) {
   return {
     njuskalo: "Njuškalo",
     index_oglasi: "Index Oglasi",
-    manual: "Cache",
+    manual: "Manual",
+    autoscout24: "AutoScout24",
   }[source] || source;
+}
+
+function marketStatusLabel(status) {
+  return {
+    not_checked: "Not checked",
+    needs_refresh: "Needs refresh",
+    missing_make_model_year: "Missing make/model/year",
+    no_market_listings: "No listings found",
+    request_failed: "Request failed",
+  }[status] || status.replaceAll("_", " ");
 }
 
 function escapeHtml(value) {
@@ -136,15 +196,19 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-els.refreshBtn.addEventListener("click", () => load(true));
+els.refreshBtn.addEventListener("click", () => refreshMarket());
 els.manualForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const payload = {
-    title: els.manualTitle.value,
+    make: els.manualMake.value,
+    model: els.manualModel.value,
+    year: Number(els.manualYear.value),
+    title: els.manualTitle.value || null,
     url: els.manualUrl.value,
     price_eur: Number(els.manualPrice.value),
     mileage_km: Number(els.manualMileage.value),
-    year: els.manualYear.value ? Number(els.manualYear.value) : null,
+    battery_kwh: els.manualBattery.value ? Number(els.manualBattery.value) : null,
+    trim: els.manualTrim.value || null,
   };
   const response = await fetch("/api/manual-listings", {
     method: "POST",
@@ -153,14 +217,14 @@ els.manualForm.addEventListener("submit", async (event) => {
   });
   if (response.ok) {
     els.manualForm.reset();
-    await load(false);
+    await load();
   } else {
     const data = await response.json();
     els.statuses.innerHTML = `<div class="status bad">Manual listing failed: ${escapeHtml(data.detail || "Invalid input")}</div>`;
   }
 });
-for (const input of [els.minPrice, els.maxPrice, els.maxMileage, els.srcNjuskalo, els.srcIndex]) {
-  input.addEventListener("change", () => load(false));
+for (const input of [els.minPrice, els.maxPrice, els.maxMileage]) {
+  input.addEventListener("change", () => load());
 }
 
-load(false);
+load();
